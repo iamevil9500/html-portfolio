@@ -1,0 +1,580 @@
+import java.util.Scanner;
+import java.util.Random;
+import java.util.ArrayList;
+import java.util.HashSet;
+
+
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+
+
+class MAIN_DONATION_CONTROL{
+    Donation mk1;
+    donor mk2;
+    item_xt mk3;
+    Ngo mk4;
+    Request_xt mk5;
+    grouped_info_donor_donation mk6;
+    SPECIAL_REQUESTION_COLLECTOR mk7;
+    boolean donor=false;
+    boolean ngo=false;
+    boolean access=false;
+    boolean owner=false;
+    Scanner input=new Scanner(System.in);
+
+    MAIN_DONATION_CONTROL(Donation mk1,donor mk2,item_xt mk3,Ngo mk4,Request_xt mk5,grouped_info_donor_donation mk6,SPECIAL_REQUESTION_COLLECTOR mk7,boolean ngo_side,boolean donor_side){
+        this.mk1=mk1;
+        this.mk2=mk2;
+        this.mk3=mk3;
+        this.mk4=mk4;
+        this.mk5=mk5;
+        this.mk6=mk6;
+        this.mk7=mk7;
+        this.donor=donor_side;
+        this.ngo=ngo_side;
+    }
+
+    void Donation_control(){
+        if(donor || ngo){
+            access=true;
+            System.out.println("access granted");
+        }
+        if(donor && ngo){
+            System.out.print("ENTER THE PASSWORD :");
+            String pass =input.nextLine();
+            if(pass.equalsIgnoreCase("IamOwner")){
+                owner=true;
+            }
+            else {
+                System.out.println("wrong password \n" +
+                        "set to donor mode");
+                donor=true;
+                ngo=false;
+            }
+
+        }
+    }
+    void SEE_DONATION_OPERATION(){
+        if(access){
+            if(donor || owner){
+                mk1.show_items();
+                System.out.println("---------------");
+                System.out.println(mk1.getDonationSummary());
+
+                mk2.show_name_plus_id();
+                System.out.println("-------------");
+
+                System.out.println("donor and their donation info(includes requested + given)");
+                System.out.println("----------------------------");
+                mk6.show_info();
+
+
+                System.out.println("---------REQUESTS-------------");
+
+                mk7.special_item_list();
+
+
+                System.out.println("---------- REQUEST MADE BY NGO");
+
+
+            }
+        }
+    }
+    void NGO_operation(){
+        if(access){
+            if(ngo || owner){
+                mk1.show_items();
+                System.out.println("---------------");
+                System.out.println(mk1.getDonationSummary());
+
+                mk2.show_name_plus_id();
+                System.out.println("-------------");
+
+
+                System.out.println("donor and their donation info(includes requested + given)");
+                System.out.println("----------------------------");
+                mk6.show_info();
+
+
+
+                System.out.println("---------REQUESTS-------------");
+
+                mk7.special_item_list();
+
+
+                System.out.println("--------------SPECIAL REQUEST DONE BY NGO");
+                mk4.show_all_object_demanded();
+
+
+
+            }
+        }
+    }
+}
+
+
+
+
+class Ngo{
+
+    ArrayList<String> all_items=new ArrayList<>();
+ArrayList<item_xt> items_demand=new ArrayList<>();
+item_xt obj_1;
+
+    void set_request_for_specific_existing_item(Donation obj_1,item_xt obj_2){
+        obj_1.show_items();
+        System.out.println("special request for item name: "+obj_2.item_name);
+        if(obj_1.item_list_xt.contains(obj_2)){
+            System.out.println("valid item request set to be true");
+            items_demand.add(obj_2);
+        }
+    }
+    void add_new_item_request(String cate,String name){
+        obj_1=new item_xt(cate,name);
+        obj_1.verify_item();
+        items_demand.add(obj_1);
+        System.out.println("item added :"+name);
+
+    }
+    void search_donation(Donation obj_1,String search_cate){
+        /*
+        boolean electronics=false;
+        boolean cloths=false;
+        for(int x=0;x<obj_1.item_list_xt.size();x++){
+            if(obj_1.item_list_xt.get(x).item_cate.equalsIgnoreCase("electronics")){
+                boolean electronics=true;
+            }
+            if(obj_1.item_list_xt.get(x).item_cate.equalsIgnoreCase("cloths")){
+                boolean cloths=true;
+            }*/
+        System.out.println("\nCATEGORY SEARCH\n----------------");
+
+        String search = search_cate;
+        for (item_xt item : obj_1.item_list_xt) {
+            if (item.item_cate.equalsIgnoreCase(search)) {
+                System.out.println("Found: " + item.item_name);
+            }
+        }
+    }
+        void show_all_object_demanded(){
+            for(int x=0;x<items_demand.size();x++){
+                System.out.println(items_demand.get(x).item_name);
+            }
+        }
+    }
+
+
+class SPECIAL_REQUESTION_COLLECTOR{
+    ArrayList<Collector> special_request_item=new ArrayList<>();
+    Collector obj_1;
+    SPECIAL_REQUESTION_COLLECTOR(Collector obj_1){
+        this.obj_1=obj_1;
+        special_request_item.add(obj_1);
+    }
+    void special_item_list(){
+        for(int x=0;x<special_request_item.size();x++){
+            System.out.println("SPECIAL ITEM NAME :"+special_request_item.get(x).obj_2.item_name);
+        }
+    }
+
+}
+class Collector{
+    Donation obj_1;
+    item_xt obj_2;
+    Collector(Donation obj_1,item_xt obj_2){
+        this.obj_1=obj_1;
+        this.obj_2=obj_2;
+    }
+}
+
+
+
+class Request_xt{
+    donor obj_1;
+    String name_of_donor;
+    String request_agree_or_disagree;
+    HashSet<String> name_list=new HashSet<>();
+    Request_xt(donor obj_1){
+        this.obj_1=obj_1;
+    }
+    void create_request(String request,String name){
+        System.out.println("\n SPECIAL REQUEST SET TO BE :\n-----------------------\nyour request is :"+request);
+        if(obj_1.name_xl.contains(name)){
+            System.out.println("***\tyou are given access to request\n***");
+            name_of_donor=name;
+            name_list.add(name);
+            request_agree_or_disagree=request;
+        }
+        else{
+            System.out.println("***\taccess denied\t***");
+        }
+        /**/
+
+
+    }
+    void setRequest_agree_or_disagree(){
+        project_op_3.api_agreement(request_agree_or_disagree);
+
+    }
+
+    Collector set_request_for_specific(Donation obj_1,item_xt obj_2){
+        obj_1.show_items();
+        System.out.println("special request for item name: "+obj_2.item_name);
+        String stored_str="mk2";
+        if(obj_1.item_list_xt.contains(obj_2)){
+            System.out.println("valid item request set to be true");
+            return new Collector(obj_1,obj_2);
+        }
+        else {
+            return new Collector(obj_1,obj_2);
+        }
+
+
+    }
+};
+
+
+
+class info_donation{
+donor xt_1;
+Donation xt_2;
+info_donation(donor xt_1,Donation xt_2){
+    this.xt_1=xt_1;
+    this.xt_2=xt_2;
+}
+}
+
+class grouped_info_donor_donation{
+    info_donation input_1;
+    ArrayList<info_donation> xlm=new ArrayList<>();
+    grouped_info_donor_donation(info_donation input_1){
+        this.input_1=input_1;
+    }
+    void add_info(){
+        xlm.add(input_1);
+    }
+    void show_info(){
+        System.out.println("\n\n\n\n DONOR AND THEIR DONATION INFO----------------");
+
+        for(int x=0;x<xlm.size();x++){
+            System.out.print("DONATED ITEM BY :" );
+       xlm.get(x).xt_1.show_name();
+       xlm.get(x).xt_2.show_items();
+            System.out.println("id end------------");
+    }}
+
+}
+
+
+class donor {
+    ArrayList<String> name_xl = new ArrayList<>();
+    ArrayList<Integer> int_1 = new ArrayList<>();
+    private ArrayList<String> confirmed_name = new ArrayList<>();
+    Scanner input = new Scanner(System.in);
+    String name;
+    Random rnw = new Random();
+
+
+    void add_name(String name_input) {
+        name_xl.add(name_input);
+        int_1.add(rnw.nextInt(10000, 90000));
+
+    }
+
+
+    void show_name() {
+        for (int x = 0; x < name_xl.size(); x++) {
+            System.out.println(name_xl.get(x));
+        }
+
+    }
+
+    void show_name_plus_id() {
+        System.out.println("\nPERSONAL INFO :--------------");
+        for (int x = 0; x < name_xl.size(); x++) {
+            System.out.println("name :" + name_xl.get(x));
+        }
+        for (int x = 0; x < int_1.size(); x++) {
+            System.out.println("id :" + int_1.get(x));
+        }
+        System.out.println("------------------");
+    }
+
+    void verify_the_name() {
+        System.out.print("Add the name: ");
+        String name_verification = input.nextLine();
+        if (!name_verification.isEmpty()) {
+            if (name_xl.contains(name_verification)) {
+                System.out.println("NAME VERIFICATION PASSED \n ADDED TO PERMENENT LIST");
+                confirmed_name.add(name_verification);
+            } else {
+                System.out.println("YOU NAME DOESNT BELONG IN TEMP LIST TOO");
+            }
+        } else {
+            System.out.println("DONT ENTER EMPTY NAME");
+        }
+    }
+
+    void Add_name_to_perm() {
+        System.out.print("ENTER THE PASSWORD :");
+        String pass = input.nextLine();
+        boolean owner = false;
+        if (pass.equalsIgnoreCase("IamOwner")) {
+            owner = true;
+            if(owner) {
+                System.out.println("Access granted add the name");
+                confirmed_name.add(input.nextLine());
+            }
+        }
+
+    }
+
+    ArrayList<String> get_cnf_name(){
+        return confirmed_name;
+    }
+}
+
+class Donation{
+    ArrayList<item_xt> item_list_xt=new ArrayList<>();
+
+
+    void add_items(item_xt item_input){
+        item_list_xt.add(item_input);
+    }
+    void remove_item(String item_name){
+        item_list_xt.removeIf(item -> item.item_name.equalsIgnoreCase(item_name));
+
+    }
+    void show_items(){
+        System.out.println("\nITEM CART SHOWCASE\n-----------");
+        for(int x=0;x<item_list_xt.size();x++){
+            System.out.println("ITEM :"+item_list_xt.get(x).item_name);
+
+        }
+    }
+    int getDonationSummary(){
+        return item_list_xt.size();
+
+    }
+    void add_spc_request(){
+
+    }
+}
+
+class item_xt{
+    String item_cate;
+    String item_name;
+    boolean item_donation_accepted=false;
+    item_xt(String item_cate,String item_name){
+        this.item_cate=item_cate;
+        this.item_name=item_name;
+    }
+    void verify_item(){
+        try{
+            Category item_1=Category.valueOf(item_cate.toLowerCase());
+            System.out.println("\n-------------valid category item :"+item_cate);
+        }
+        catch (IllegalArgumentException e){
+            System.out.println("\n***************invalid category entered:"+item_cate);
+        }
+    }
+    static void category_info(){
+        System.out.println("""
+                 THESE ARE THE FOLLOWING CATEGORY :
+                 ----------------------------------
+                 cloths ,
+                 food,
+                 medicine,
+                 toys,
+                 electronics
+                 \n \n \n
+                """);
+    }
+
+}
+
+enum Category{
+    cloths,
+    food,
+    medicine,
+    toys,
+    electronics
+    ;
+
+}
+
+
+public class project_op_3 {
+    public static void main(String[] arg) {
+
+
+        item_xt i_1 = new item_xt("electronics", "ps5");
+        item_xt i_2 = new item_xt("electronics", "ps4");
+        item_xt i_3 = new item_xt("electronics", "ps3");
+        item_xt i_4 = new item_xt("cloths", "wollen cloth");
+        item_xt i_5 = new item_xt("electronics", "smartphone");
+        item_xt i_6 = new item_xt("electronics", "iphone");
+
+        item_xt[] itemXts={i_1,i_2,i_3,i_4,i_5,i_6};
+        Donation d_1=new Donation();
+        d_1.add_items(i_1);
+        d_1.add_items(i_2);
+        d_1.add_items(i_3);
+        d_1.add_items(i_4);
+        d_1.add_items(i_5);
+        d_1.add_items(i_6);
+
+
+
+        /*process to group info*/
+
+
+        donor dn_1=new donor();
+        dn_1.add_name("aryan");
+        info_donation inf_1=new info_donation(dn_1,d_1);
+        grouped_info_donor_donation gi_dd=new grouped_info_donor_donation(inf_1);
+        gi_dd.add_info();
+        gi_dd.show_info();
+
+        Request_xt rxt=new Request_xt(dn_1);
+
+        rxt.create_request("provide 500 kilos of gold","aryan");
+
+
+        SPECIAL_REQUESTION_COLLECTOR spc_1=new SPECIAL_REQUESTION_COLLECTOR( rxt.set_request_for_specific(d_1,i_2));
+        System.out.println("-------");
+
+        Ngo ngo=new Ngo();
+        ngo.add_new_item_request("electronics","mk7");
+        ngo.search_donation(d_1,"electronics");
+
+        spc_1.special_item_list();
+
+        d_1.remove_item("mk1");
+
+        dn_1.show_name_plus_id();
+
+
+        MAIN_DONATION_CONTROL main_obj=new MAIN_DONATION_CONTROL(d_1,dn_1,i_4,ngo,rxt,gi_dd,spc_1,false,false);
+        main_obj.Donation_control();
+        main_obj.NGO_operation();
+
+
+        System.out.println("-----------------------------------end-------------------------------");
+        gi_dd.show_info();
+
+
+    }
+
+
+
+    /*API ---- integration */
+    public static void api_agreement(String requestText) {
+        try {
+            String jsonBody = """
+        {
+            "model": "llama3",
+            "prompt": "You are a decision assistant. Read the following request: '%s'. ONLY respond with 'Agree' or 'Disagree'. No explanation.",
+            "stream": true
+        }
+        """.formatted(requestText);
+
+            HttpClient client = HttpClient.newHttpClient();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:11434/api/generate"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .build();
+
+            HttpResponse<java.io.InputStream> response =
+                    client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(response.body(), StandardCharsets.UTF_8))) {
+
+                String line;
+                System.out.print("Decision: ");
+                while ((line = reader.readLine()) != null) {
+                    line = line.trim();
+                    if (line.isEmpty()) continue;
+
+                    if (line.contains("\"response\"")) {
+                        String text = line.split("\"response\":\"")[1];
+                        int endIndex = text.indexOf("\",\"done\"");
+                        if (endIndex != -1) text = text.substring(0, endIndex);
+                        System.out.print(text);  // print as AI writes
+                    } else if (line.contains("\"done\":true")) {
+                        break;  // stop after final chunk
+                    }
+                }
+            }
+
+            System.out.println();  // newline at the end
+
+        } catch (Exception e) {
+            System.out.println("⚠️ Error while calling Ollama API: " + e.getMessage());
+        }
+    }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      /*
+        Scanner input=new Scanner(System.in);
+        System.out.println("ENTER THE THE DETAILS AS FOLLOWING");
+        item_xt.category_info();
+
+
+        String [] category_check={"cloths","food","medicine","toys","electronics"};
+
+        boolean passed=false;
+        System.out.println("ENTER THE CATEGORY :");
+        String cate_input = input.nextLine();
+        boolean passing=false;
+
+
+
+        for(int x=0;x<category_check.length;x++){
+            if(cate_input.equalsIgnoreCase(category_check[x])){
+                passed=true;
+                break;
+
+                }
+        }
+        System.out.println(passed);
+
+        System.out.println("ENTER THE ITEM NAME :");
+        String item_input = input.nextLine();
+
+        if(passed){
+            item_xt i_1=new item_xt(cate_input,item_input);
+        i_1.verify_item();}
+        else{
+            System.out.println("invalid category");
+        }
+
+
+
+
+
+
+        input.close();
+*/
